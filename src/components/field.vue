@@ -1,5 +1,4 @@
 <template>
-  [field]
 </template>
 
 <script>

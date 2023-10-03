@@ -1,7 +1,6 @@
 <template>
-  <div class="test">[This is FormPI Hey]</div>
   <slot></slot>
-  <pre>
+  <pre class="text-xs text-gray-500">
   {{ schema }}
   </pre>
 </template>
@@ -9,7 +8,13 @@
 import { defineComponent, ref, toRefs } from 'vue'
 
 export default defineComponent({
-  setup(props, { attrs, slots, emit }) {
+  inheritAttrs: false,
+  props: {
+    modelValue: Object,
+    schema: Object
+  }, 
+  setup: (props,  { attrs, slots, emit }) => {
+    console.log('FormPi', props, attrs)
     var { modelValue, schema } = toRefs(props)
 
     let gid = 1
@@ -94,9 +99,3 @@ export default defineComponent({
   }
 })
 </script>
-
-<style>
-.test {
-  color: red;
-}
-</style>

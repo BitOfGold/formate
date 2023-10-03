@@ -1,5 +1,4 @@
 <template>
-  [group]
 </template>
 
 <script>
