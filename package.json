@@ -1,12 +1,18 @@
 {
   "name": "formpi",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "description": "A Vue Form library/form builder. Using Tailwind CSS and Daisy UI.",
   "main": "src/formpi.js",
+  "exports": {
+    "import": "./dist/formpi.mjs",
+    "require": "./dist/formpi.js"
+  },
   "files": [
-    "src"
+    "dist"
   ],
   "scripts": {
+    "dev": "vite build --watch",
+    "build": "vite build"
   },
   "repository": {
     "type": "git",
@@ -21,10 +27,18 @@
     "css",
     "daisyui"
   ],
-  "author": "László Matuska",
+  "author": "László Matuska @BitOfGold",
   "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/BitOfGold/formpi/issues"
   },
-  "homepage": "https://github.com/BitOfGold/formpi#readme"
+  "homepage": "https://github.com/BitOfGold/formpi#readme",
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.4.0",
+    "vite": "^4.4.10",
+    "vite-plugin-css-injected-by-js": "^3.3.0"
+  },
+  "dependencies": {
+    "vue": "^3.3.4"
+  }
 }
