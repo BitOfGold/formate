@@ -4,7 +4,7 @@
 
 ## Development :sunglasses:
 
-Currently under development, please don't use (yet). :wink:
+(Under development, please don't use it, yet :smirk: )
 
 ## install
 
