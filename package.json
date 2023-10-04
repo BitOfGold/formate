@@ -1,7 +1,7 @@
 {
   "name": "formpi",
-  "version": "0.0.7",
-  "description": "A Vue Form component/form builder. Using Tailwind CSS and Headless UI.",
+  "version": "0.0.8",
+  "description": "A Vue Form component library/form builder. Using Tailwind CSS and Headless UI.",
   "main": "src/formpi.js",
   "exports": {
     "import": "./dist/formpi.mjs",
