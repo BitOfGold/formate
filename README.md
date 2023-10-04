@@ -1,6 +1,6 @@
 # FormPI
 
-> A Vue Form library/form builder. Using Tailwind CSS and Daisy UI.
+> A Vue Form component library/form builder. Using Tailwind CSS and Headless UI.
 
 ## Development :sunglasses:
 
