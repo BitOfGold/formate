@@ -39,6 +39,7 @@
     "vite-plugin-css-injected-by-js": "^3.3.0"
   },
   "dependencies": {
+    "vee-validate": "^4.11.7",
     "vue": "^3.3.4"
   }
 }
