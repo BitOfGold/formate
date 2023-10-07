@@ -4,7 +4,7 @@
       <div v-if="!floating" :class="'flex items-end label ' + (side ? labelSideClasses : ' flex-row ')">
         <label :for="name" :class="labelClasses">
           <span v-html="schema.label"></span>
-          <span v-if="schema.rules" :class="requiredClasses">Required</span>
+          <span v-if="schema.rules" :class="requiredClasses">{{ messages.text_required }}</span>
         </label>
       </div>
       <div :class="'flex flex-col w-full relative input ' + (floating?'floating ':' ') + hasValue">
@@ -34,7 +34,7 @@
       <label :for="name" :class="labelClasses + (side ? labelSideClasses : ' ')">
           <span v-html="schema.label"></span>
           <span v-if="schema.rules && floating" :class="requiredFloatingClasses">*</span>
-          <span v-if="schema.rules && !floating" :class="requiredClasses">Required</span>
+          <span v-if="schema.rules && !floating" :class="requiredClasses">{{ messages.text_required }}</span>
       </label>
       <div :class="'flex flex-col w-full relative input ' + (floating?'floating ':' ') + hasValue">
         <div v-if="schema.help" v-html="schema.help" :class="helperClasses + ' text-left pb-2 pl-3 '"></div>
@@ -63,7 +63,10 @@
 </template>
 
 <script setup>
+import { computed, defineProps, toRefs} from "vue"
+import { useField } from "vee-validate"
 
+// Classes ---------------------------------------
 const fieldGroupClasses = "mt-6 w-full relative appearance-none "
 const fieldGroupSideClasses = "flex flex-col xl:flex-row xl:items-top "
 const inputClasses = "bg-white dark:bg-darkmode-900 relative outline-none h-10 w-full px-3 disabled:bg-slate-100 disabled:cursor-not-allowed dark:disabled:bg-darkmode-800/50 dark:disabled:border-transparent [&[readonly]]:bg-slate-100 [&[readonly]]:cursor-not-allowed [&[readonly]]:dark:bg-darkmode-800/50 [&[readonly]]:dark:border-transparent transition duration-200 ease-in-out w-full border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90 focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus:border-primary focus:border-opacity-40 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 dark:placeholder:text-slate-500/80 select-text "
@@ -78,27 +81,25 @@ const helperClasses = "text-sm pt-1 leading-snug text-slate-400 dark:text-slate-
 const requiredClasses = "ml-2 px-2 py-0.5 bg-slate-300 text-slate-600 dark:bg-darkmode-600 dark:text-slate-400 text-xs rounded-md "
 const requiredFloatingClasses = " "
 
-import { computed, defineProps, toRefs} from "vue"
-import { useField } from "vee-validate"
 
+// Properties -------------------------------------
 const props = defineProps({
   modelValue: String | Number,
   name: String,
   schema: Object,
   floating: Boolean,
-  side: Boolean
+  side: Boolean,
+  messages: Object,
 })
+const {name, schema, floating, side, messages } = toRefs(props)
 
-const {name, schema, floating, side } = toRefs(props)
 
+// Init field ------------------------------------
 const { value, errors, errorMessage, meta } = useField(name.value, schema.value.rules, {
   syncVModel: true,
 })
-
 const errorMsg = computed(() => errorMessage.value ? ('' + errorMessage.value).replace(name.value, schema.value.label):false)
-
 const hasValue = computed(() => value.value && value.value.length > 0 ? "has-value " : " ")
-
 const autocomplete = computed(() => {
   if (schema.value.autocomplete) {
     return schema.value.autocomplete

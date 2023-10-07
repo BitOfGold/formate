@@ -1,12 +1,12 @@
 <template>
-    <div :class="'select-none ' + classes">
+    <div :class="'select-none flex flex-col ' + classes">
         <form @submit.prevent="onSubmit">
             <slot></slot>
-            <fieldset v-for="(g, n) in freshSchema.groups" :class="g.class">
+            <fieldset v-for="(g, n) in freshSchema.groups" :class="'flex flex-col '+  g.class">
                 <legend v-if="g.label" :class="legendClasses + (g.legendclass ? g.legendclass : ' ')">{{ g.label }}</legend>
-                <FormField v-for="(f, fn) in g.fields" :name="fn" :schema="f" :floating="floating" :side="side"></FormField>
+                <FormField v-for="(f, fn) in g.fields" :name="fn" :schema="f" :floating="floating" :side="side" :messages="messages"></FormField>
             </fieldset>
-            <FormField v-for="(f, n) in freshSchema.fields" :name="n" :schema="f" :floating="floating" :side="side"></FormField>
+            <FormField v-for="(f, n) in freshSchema.fields" :name="n" :schema="f" :floating="floating" :side="side" :messages="messages"></FormField>
         </form>
     </div>
 </template>
@@ -16,46 +16,58 @@ const legendClasses = "w-full text-lg font-bold pb-1 mb-4 "
 import { useSlots, defineProps, defineEmits, computed, ref, toRefs, watch, onMounted } from 'vue'
 import FormField from './FormField.vue'
 import { useForm, configure } from 'vee-validate'
-import { localize, loadLocaleFromURL } from '@vee-validate/i18n';
+import { localize } from '@vee-validate/i18n';
 
+// Properties -------------------------------------
 const props = defineProps({
     modelValue: Object,
     schema: Object,
-    language: String,
+    locale: String,
     floating: Boolean,
     side: Boolean,
     class: String,
 })
 
-const { modelValue, schema, language, floating, side } = toRefs(props)
+const { modelValue, schema, locale, floating, side } = toRefs(props)
 const classes = ref(props.class)
+const emit = defineEmits(['update:modelValue', 'change', 'submit'])
 
-function setLanguage(lang) {
-    if (lang) {
-        loadLocaleFromURL('https://unpkg.com/@vee-validate/i18n@4.1.0/dist/locale/' + lang + '.json').then((messages) => {
-            configure({
-                generateMessage: localize(lang)
-            })
-        })
+
+// Localize ---------------------------------------
+const messages = ref({})
+
+async function setLocale(locale) {
+    const loc = await fetch('https://unpkg.com/formpi@0.1.1/locale/' + locale + '.json', {
+      headers: {
+        'content-type': 'application/json',
+      },
+    }).then(res => res.json())
+    if (!loc.code) {
+      console.error('Could not identify locale, ensure the locale file contains `code` field')
+      return
     }
-}
-if (language) {
-    setLanguage(props.language)
-} else {
-    language.value = 'en'
-    setLanguage('en')
+    localize({ [loc.code]: loc })
+    configure({
+        generateMessage: localize(locale)
+    })
+    messages.value = loc.messages
 }
 
-watch(() => language, (n) => {
-    setLanguage(n)
+if (locale.value) {
+    setLocale(locale.value)
+} else {
+    locale.value = 'en'
+    setLocale('en')
+}
+watch(() => locale, (n) => {
+    setLocale(n.value)
 })
 
+
+// Init Form --------------------------------------
 const { handleSubmit, values } = useForm({
     initialValues: modelValue.value,
 })
-
-const emit = defineEmits(['update:modelValue', 'change', 'submit'])
-
 
 watch(values, (n) => {
     emit('update:modelValue', values)
@@ -70,6 +82,8 @@ const onSubmit = handleSubmit((values) => {
     console.warn('----------- invalid Submit: ', values, errors)
 })
 
+
+// Refresh schema ---------------------------------
 const freshSchema = computed(() => {
     const slots = useSlots()
 
