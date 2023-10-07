@@ -1,0 +1,28 @@
+{
+  "code": "hu",
+  "messages": {
+    "alpha": "{field} kizárólag betűket tartalmazhat",
+    "alpha_dash": "{field} kizárólag betűket, számokat, kötőjeleket és alulvonásokat tartalmazhat",
+    "alpha_num": "{field} kizárólag betűket és számokat tartalmazhat",
+    "alpha_spaces": "{field} kizárólag betűket és szóközöket tartalmazhat",
+    "between": "{field} 0:{min} és 1:{max} között kell, hogy legyen",
+    "confirmed": "{field} nem egyezik a megerősítéssel",
+    "digits": "{field} 0:{length} számjegyű kell, hogy legyen",
+    "dimensions": "{field} felbontása 0:{width} és 1:{height} pixel között kell, hogy legyen",
+    "email": "{field} nem érvényes email formátum",
+    "not_one_of": "{field} értéke érvénytelen",
+    "ext": "{field} nem érvényes fájl",
+    "image": "{field} képfálj kell, hogy legyen",
+    "one_of": "A kiválaszott {field} érvénytelen",
+    "max": "{field} értéke nem lehet hosszabb mint 0:{length}",
+    "max_value": "{field} értéke 0:{max} vagy kevesebb lehet",
+    "mimes": "{field} kizárólag érvényes fájlformátumok egyike lehet",
+    "min": "{field} értéke nem lehet rövidebb mint 0:{length}",
+    "min_value": "{field} értéke 0:{min} vagy több lehet",
+    "numeric": "{field} értéke szám kell, hogy legyen",
+    "regex": "{field} formátuma érvénytelen",
+    "required": "{field} megadása kötelező",
+    "required_if": "{field} megadása kötelező",
+    "size": "{field} méretének 0:{size} kilobájtnál kisebbnek kell lennie"
+  }
+}

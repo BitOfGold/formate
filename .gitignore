@@ -22,3 +22,4 @@ TODOs.md
 .env.test.local
 .env.production.local
 .env.local
+locale/*.json

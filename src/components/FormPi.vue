@@ -2,8 +2,8 @@
     <div :class="'select-none ' + classes">
         <form @submit.prevent="onSubmit">
             <slot></slot>
-            <fieldset v-for="(g, n) in freshSchema.groups" :classes="g.class">
-                <legend class="text-lg font-bold">{{ g.label }}</legend>
+            <fieldset v-for="(g, n) in freshSchema.groups" :class="g.class">
+                <legend v-if="g.label" :class="legendClasses + (g.legendclass ? g.legendclass : ' ')">{{ g.label }}</legend>
                 <FormField v-for="(f, fn) in g.fields" :name="fn" :schema="f" :floating="floating" :side="side"></FormField>
             </fieldset>
             <FormField v-for="(f, n) in freshSchema.fields" :name="n" :schema="f" :floating="floating" :side="side"></FormField>
@@ -12,6 +12,7 @@
 </template>
 
 <script setup>
+const legendClasses = "w-full text-lg font-bold pb-1 mb-4 "
 import { useSlots, defineProps, defineEmits, computed, ref, toRefs, watch, onMounted } from 'vue'
 import FormField from './FormField.vue'
 import { useForm, configure } from 'vee-validate'

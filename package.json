@@ -1,17 +1,19 @@
 {
   "name": "formpi",
-  "version": "0.0.9",
+  "version": "0.1.0",
   "description": "FormPI: A Vue Form component library/form builder. Using Tailwind CSS and Headless UI.",
   "exports": {
     "import": "./dist/formpi.mjs",
     "require": "./dist/formpi.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "locale"
   ],
   "scripts": {
     "dev": "vite build --watch",
-    "build": "vite build"
+    "build": "vite build",
+    "locales": "node ./scripts/locales.js"
   },
   "repository": {
     "type": "git",
@@ -24,8 +26,7 @@
     "library",
     "builder",
     "tailwind",
-    "css",
-    "headlessui"
+    "css"
   ],
   "author": "László Matuska @BitOfGold",
   "license": "Apache-2.0",
