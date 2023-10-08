@@ -1,7 +1,6 @@
 # FormPI
 
-> A Vue Form component library/form builder. Using Tailwind CSS and Headless UI.
-
+> A Vue Form component library/form builder. Using Tailwind CSS and VeeValidate
 ## Development :sunglasses:
 
 (Under development, please don't use it, yet :smirk: )

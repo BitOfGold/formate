@@ -1,14 +1,12 @@
 <template>
-    <div :class="'select-none flex flex-col ' + classes">
-        <form @submit.prevent="onSubmit">
-            <slot></slot>
-            <fieldset v-for="(g, n) in freshSchema.groups" :class="'flex flex-col '+  g.class">
-                <legend v-if="g.label" :class="legendClasses + (g.legendclass ? g.legendclass : ' ')">{{ g.label }}</legend>
-                <FormField v-for="(f, fn) in g.fields" :name="fn" :schema="f" :floating="floating" :side="side" :messages="messages"></FormField>
-            </fieldset>
-            <FormField v-for="(f, n) in freshSchema.fields" :name="n" :schema="f" :floating="floating" :side="side" :messages="messages"></FormField>
-        </form>
-    </div>
+    <form @submit.prevent="onSubmit" :class="'select-none flex-col gap-2 ' + classes" :language="locale">
+        <slot></slot>
+        <fieldset v-for="(g, n) in freshSchema.groups" :class="'flex flex-col gap-2 field-group ' + g.class">
+            <legend v-if="g.label" :class="legendClasses + (g['label-class'] ? g['label-class'] : ' ')">{{ g.label }}</legend>
+            <FormField v-for="(f, fn) in g.fields" :name="fn" :schema="f" :floating="floating" :side="side" :messages="messages"></FormField>
+        </fieldset>
+        <FormField v-for="(f, n) in freshSchema.fields" :name="n" :schema="f" :floating="floating" :side="side" :messages="messages"></FormField>
+    </form>
 </template>
 
 <script setup>
@@ -23,8 +21,8 @@ const props = defineProps({
     modelValue: Object,
     schema: Object,
     locale: String,
-    floating: Boolean,
-    side: Boolean,
+    floating: Boolean|String,
+    side: Boolean|String,
     class: String,
 })
 
@@ -88,6 +86,7 @@ const freshSchema = computed(() => {
     const slots = useSlots()
 
     let allSchema = {groups: {}, fields: {}}
+    let tabindex = 1
     let gid = 1
     let fid = 1
 
@@ -105,6 +104,10 @@ const freshSchema = computed(() => {
     }
 
     function addField(attr, group = false) {
+        if (attr.type != 'html') {
+            attr.tabindex = tabindex
+            tabindex += 100
+        }
         let name = false;
         if (attr.name) {
             name = attr.name
