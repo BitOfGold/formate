@@ -302,7 +302,7 @@ before:checked:ml-[28px] before:checked:bg-white
 // border-2 border-solid before:dark:bg-darkmode-500  border-neutral-300 outline-none dark:border-transparent checked:border-primary 
 
 const checkBoxClasses = sanitize(`
-relative float-left mr-[6px] mt-[-0.5] h-[24px] w-[24px] appearance-none rounded-[4px] shadow-inner
+relative float-left mr-[6px] mt-[-0.5] h-[24px] w-[24px] appearance-none rounded-[4px] shadow-inner cursor-pointer
 bg-white dark:bg-darkmode-900
 border-0 outline-none
 before:pointer-events-none before:absolute before:h-[14px] before:w-[14px] before:scale-0 before:rounded-full
@@ -327,7 +327,7 @@ dark:focus:ring-opacity-50
 
 
 const radioClasses = sanitize(`
-relative float-left mr-1 mt-[-0.5] h-[24px] w-[24px] appearance-none rounded-full shadow-inner
+relative float-left mr-1 mt-[-0.5] h-[24px] w-[24px] appearance-none rounded-full shadow-inner cursor-pointer
 bg-white dark:bg-darkmode-900
 border-0 outline-none
 before:pointer-events-none before:absolute before:h-4 before:w-4 before:scale-0 before:rounded-full

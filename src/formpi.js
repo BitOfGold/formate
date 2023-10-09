@@ -27,7 +27,7 @@ const clickOutside = {
         return
       }
       if (!(el == event.target || el.contains(event.target))) {
-        binding.value()
+        binding.value(event.target)
       }
     }
     document.addEventListener("click", el.clickOutsideEvent)
@@ -44,7 +44,7 @@ const focusOutside = {
         return
       }
       if (!(el == event.target || el.contains(event.target))) {
-        binding.value()
+        binding.value(event.target)
       }
     }
     window.addEventListener("focus", el.focusOutsideEvent, true)
