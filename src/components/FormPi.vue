@@ -1,5 +1,5 @@
 <template>
-    <form @submit.prevent="onSubmit" :class="'select-none flex-col gap-2 ' + classes" :language="locale">
+    <form @submit.prevent="onSubmit" :class="'select-none flex-col gap-2 text-base-700 ' + classes" :language="locale">
         <slot></slot>
         <fieldset v-for="(g, n) in freshSchema.groups" :class="'flex flex-col gap-2 field-group ' + g.class">
             <legend v-if="g.label" :class="legendClasses + (g['label-class'] ? g['label-class'] : ' ')">{{ g.label }}</legend>
@@ -20,13 +20,15 @@ import { localize } from '@vee-validate/i18n';
 const props = defineProps({
     modelValue: Object,
     schema: Object,
-    locale: String,
-    floating: Boolean|String,
-    side: Boolean|String,
+    locale: { type: String, default: 'en' },
+    tabindex: { default: 1 },
+    floating: Boolean | String,
+    side: Boolean | String,
     class: String,
 })
 
-const { modelValue, schema, locale, floating, side } = toRefs(props)
+const { modelValue, schema, locale, floating, side, tabindex } = toRefs(props)
+const tabindex_v = computed(() => parseInt(tabindex.value))
 const classes = ref(props.class)
 const emit = defineEmits(['update:modelValue', 'change', 'submit'])
 
@@ -86,7 +88,7 @@ const freshSchema = computed(() => {
     const slots = useSlots()
 
     let allSchema = {groups: {}, fields: {}}
-    let tabindex = 1
+    let tindex = tabindex_v
     let gid = 1
     let fid = 1
 
@@ -105,8 +107,7 @@ const freshSchema = computed(() => {
 
     function addField(attr, group = false) {
         if (attr.type != 'html') {
-            attr.tabindex = tabindex
-            tabindex += 100
+            attr.tabindex = tindex++
         }
         let name = false;
         if (attr.name) {

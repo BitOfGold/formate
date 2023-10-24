@@ -5,6 +5,8 @@ import Field from "./components/field.vue"
 import { defineRule } from "vee-validate"
 import * as AllRules from "@vee-validate/rules"
 
+import { OhVueIcon } from "oh-vue-icons"
+
 Object.keys(AllRules).forEach((rule) => {
   defineRule(rule, AllRules[rule])
 })
@@ -59,8 +61,9 @@ export default {
     app.component("formpi", FormPi)
     app.component("group", Group)
     app.component("field", Field)
-    app.directive('click-outside', clickOutside)
-    app.directive('focus-outside', focusOutside)
+    app.directive("click-outside", clickOutside)
+    app.directive("focus-outside", focusOutside)
+    app.component("v-icon", OhVueIcon)
     app.config.globalProperties.$throttle = throttle
   },
 }

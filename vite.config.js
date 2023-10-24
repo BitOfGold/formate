@@ -10,6 +10,9 @@ export default defineConfig({
     vue(),
     cssInjectedByJsPlugin()
   ],
+  optimizeDeps: {
+    exclude: ["oh-vue-icons/icons"]
+  },
   build: {
     lib: {
       entry: resolve(__dirname, "src/formpi.js"),

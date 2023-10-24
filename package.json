@@ -44,6 +44,7 @@
     "@vee-validate/i18n": "^4.11.7",
     "@vee-validate/rules": "^4.11.7",
     "@vueup/vue-quill": "^1.2.0",
+    "oh-vue-icons": "^1.0.0-rc3",
     "vee-validate": "^4.11.7",
     "vue": "^3.3.4"
   }
