@@ -1,7 +1,7 @@
 <template>
   <template v-if="!likeRadio && !isSingle">
     <div
-      :class="fieldGroupClasses + (isSide ? fieldGroupSideClasses : ' flex flex-col gap-1 ') + (floating ? fieldGroupFloatingClasses : ' ') + ' field-container ' + (schema['container-class'] ? schema['container-class'] : ' ')">
+      :class="fieldGroupClasses">
       <div v-if="!floating" :class="'flex xl:items-end ' + (isSide ? labelSideClasses : ' flex-row ') + ' field-label-container ' + (schema['label-class'] ? schema['label-class'] : ' ')">
         <label :for="name" :class="labelClasses + ' field-label '">
           <span v-html="schema.label"></span>
@@ -44,9 +44,10 @@
           :tabindex = "schema.tabindex"
           ref="input"
           v-model="value"
-          :options="schema.options"
+          :options="sOptions"
+          :option-class="schema['option-class']"
           :search="schema.search"
-          :classes="(floating ? 'floating ' : ' ') + inputClasses + selectClasses + (errorMsg ? errorFieldClasses : ' ') + hasValue + ' input select ' + (schema.class ? schema.class : ' ')"
+          :class="(floating ? 'floating ' : ' ') + inputClasses + selectClasses + (errorMsg ? errorFieldClasses : ' nincserror ') + hasValue + ' input select ' + (schema.class ? schema.class : ' ')"
         />
 
         <div v-if="schema.type == 'select'" :class="(floating ? 'floating ' : ' ') + inputClasses + selectClasses + (errorMsg ? errorFieldClasses : ' ') + hasValue + ' input textarea ' + (schema.class ? schema.class : ' ')">
@@ -57,13 +58,11 @@
             ref="input"
             v-model="value"
             v-bind="filteredSchema"
-            class="h-full w-full px-3 outline-none bg-transparent border-0 cursor-pointer "
+            class="w-full h-full px-3 bg-transparent border-0 outline-none cursor-pointer "
           >
-            <option value="1">First</option>
-            <option value="2">Second</option>
-            <option value="3">Third</option>
+            <option v-for="o in sOptions" :key="o.value" :value="o.value" v-html="o.title"></option>
           </select>
-          <div class="absolute right-1 top-2 pointer-events-none w-6 h-6">
+          <div class="absolute w-6 h-6 pointer-events-none right-1 top-2">
             <v-icon name="hi-selector"/>
           </div>
         </div>
@@ -81,10 +80,9 @@
     </div>
   </template>
 
-
   <template v-if="likeRadio">
     <div
-      :class="fieldGroupClasses + (isSide ? fieldGroupSideClasses : '') + ' field-container ' + (schema['container-class'] ? schema['container-class'] : ' ')">
+      :class="fieldGroupClasses">
       <label :for="name" :class="labelClasses + (isSide ? labelSideClasses : ' ') + ' field-label '">
         <span v-html="schema.label"></span>
         <span v-if="schema.rules && floating" :class="requiredFloatingClasses">*</span>
@@ -108,20 +106,10 @@
 
           <template v-if="schema.type == 'radio'">
             <div class="flex flex-col">
-              <div class="mb-4 flex items-center">
-                <input type="radio" :name="name" :id="name + 'first'"  :tabindex = "schema.tabindex" value="first" :autocomplete="autocomplete" ref="input" v-model="value"
+              <div v-for="(o, n) in sOptions" :key="o.code" class="flex items-center mb-4">
+                <input type="radio" :name="name" :id="name + '-'+o.value"  :tabindex = "schema.tabindex" :value="o.value" ref="input" v-model="value"
                 v-bind="filteredSchema" :class="radioClasses + (errorMsg ? 'border-red-300 ' : ' ') + hasValue + (schema.class ? schema.class : ' ') + ' radio '" />
-                <label :for="name + 'first'" :class="labelClasses + ' mx-0 py-0 pl-3 font-normal cursor-pointer '" v-html="schema['option-label']"></label>
-              </div>
-              <div class="mb-4 items-center">
-                <input type="radio" :name="name" :id="name + 'second'"  :tabindex = "schema.tabindex + 1" value="second" :autocomplete="autocomplete" ref="input" v-model="value"
-                :class="radioClasses + (errorMsg ? 'border-red-300 ' : ' ') + hasValue + (schema.class ? schema.class : ' ') + ' radio '" />
-                <label :for="name + 'second'" :class="labelClasses + ' mx-0 py-0 pl-3 font-normal cursor-pointer '" v-html="schema['option-label']"></label>
-              </div>
-              <div class="mb-4 items-center">
-                <input type="radio" :name="name" :id="name + 'third'"  :tabindex = "schema.tabindex + 2"  value="third" :autocomplete="autocomplete" ref="input" v-model="value"
-                v-bind="filteredSchema" :class="radioClasses + (errorMsg ? 'border-red-300 ' : ' ') + hasValue + (schema.class ? schema.class : ' ') + ' radio '" />
-                <label :for="name + 'third'" :class="labelClasses + ' mx-0 py-0 pl-3 font-normal cursor-pointer '" v-html="schema['option-label']"></label>
+                <label :for="name" :class="labelClasses + ' mx-0 py-0 pl-3 font-normal cursor-pointer '" v-html="o.title"></label>
               </div>
             </div>
           </template>
@@ -143,12 +131,16 @@
 </template>
 
 <script setup>
-import { computed, defineProps, toRefs } from "vue"
+import { computed, defineProps, toRefs, getCurrentInstance } from "vue"
+import { tailwindSanitize, sanitizeOptions } from "../utils.js"
 import { useField } from "vee-validate"
 import ComboBox from "./ComboBox.vue"
 import { addIcons } from "oh-vue-icons"
 import { HiSelector } from "oh-vue-icons/icons"
 addIcons( HiSelector )
+
+// Global functions -------------------------------
+const app = getCurrentInstance().appContext.config.globalProperties
 
 // Properties -------------------------------------
 const props = defineProps({
@@ -169,24 +161,28 @@ const isSide = computed(() => {
   }
   return s
 })
+
 const filteredSchema = computed(() => {
   let fs = JSON.parse(JSON.stringify(schema.value))
-  for (let key of ['id','name','ref','type','tabindex','floating','side','messages','label','placeholder','class','container-class','label-class','classes',
-    'option-label','help','autocomplete','rules','v-model','v-bind']) {
+  for (let key of [
+    'id','name','ref','type','tabindex','floating','side','messages',
+    'label','placeholder','class','container-class','label-class','classes',
+    'input-class', 'input-container-class', 'input-label-class',
+    'slots', 'options', 'option-label','option-class', 'help','autocomplete','required', 'rules','v-model','v-bind']) {
     delete fs[key]
   }
-  console.log('filteredSchema', fs)
   return fs
 })
 
 // Init field ------------------------------------
+
 const { value, errors, errorMessage, meta } = useField(name.value, schema.value.rules, {
   syncVModel: true,
 })
 
 const errorMsg = computed(() => errorMessage.value ? ('' + errorMessage.value).replace(name.value, schema.value.label) : false)
 
-const hasValue = computed(() => value.value && value.value.length > 0 ? "has-value " : " ")
+const hasValue = computed(() => value.value && value.value.length > 0 ? "has-value " : "no-value")
 
 const autocomplete = computed(() => {
   if (schema.value.autocomplete) {
@@ -246,21 +242,32 @@ const isSingle = computed (() => {
   return singleTypes[schema.value.type]
 })
 
+const sOptions = computed(() => {
+  let res = []
+  res = schema.value.options
+  res = sanitizeOptions(res)
+  return res
+})
 
 // Classes ---------------------------------------
-function sanitize(classes) {
-  return classes.replace(/\n/g, " ").replace(/\s+/g, " ")
-}
 
 const rounding = '-md'
 
-const fieldGroupClasses = "w-full relative appearance-none "
-const fieldGroupSideClasses = "flex flex-col xl:flex-row xl:items-top "
-const fieldGroupFloatingClasses = "mt-4 "
-const inputClasses = sanitize(`
+const fieldGroupSideClasses = "flex flex-col gap-2 xl:flex-row xl:items-top"
+const fieldGroupFloatingClasses = "mt-4"
+
+const fieldGroupClasses = computed(() => tailwindSanitize(
+  "w-full relative appearance-none",
+  (isSide.value ? fieldGroupSideClasses : 'flex flex-col gap-1'),
+  (floating.value ? fieldGroupFloatingClasses : ' '),
+  schema.value['input-container-class'],
+  schema.value['container-class']
+))
+
+const inputClasses = computed(() => tailwindSanitize(`
 relative select-text py-[0.375rem] w-full rounded${rounding}
 transition-all duration-600 ease-in-out
-bg-base-50 dark:bg-darkmode-900
+bg-base-50 dark:bg-base-50
 placeholder:text-base-400/90 dark:placeholder:text-base-500/80
 outline-none
 
@@ -273,25 +280,25 @@ dark:focus:ring-opacity-50
 focus-within:ring-4 focus-within:ring-accent focus-within:ring-opacity-20
 dark:focus-within:ring-opacity-50
 
-`)
+`, schema.value['input-class']))
 
-const textareaClasses = sanitize(`
+const textareaClasses = tailwindSanitize(`
 h-auto
 h-min-96
 p-3
 `)
 
-const selectClasses = sanitize(`
+const selectClasses = tailwindSanitize(`
 relative flex items-center
 `)
 
-const inputBorderClasses = sanitize(`
-border-2 border-neutral-300 outline-none
+const inputBorderClasses = tailwindSanitize(`
+border-2 border-base-800 outline-none
 
 `)
 
-const buttonClasses = sanitize(`
-inline-flex items-center justify-center mt-6 mx-2 py-2 px-8 shadow-lg rounded cursor-pointer
+const buttonClasses = tailwindSanitize(`
+inline-flex items-center justify-center mt-6 mx-2 py-2 px-8 drop-shadow-md rounded cursor-pointer
 transition-all duration-300 ease-in-out
 bg-accent
 font-bold text-white text-shadow text-center
@@ -302,17 +309,21 @@ disabled:opacity-30 disabled:cursor-not-allowed
 focus:ring-4 focus:ring-accent focus:ring-opacity-20
 dark:focus:ring-opacity-50
 
-[&:hover:not(:disabled)]:opacity-70
+[&:hover:not(:disabled)]:opacity-80
+[&:hover:not(:disabled)]:translate-x-0.5 [&:hover:not(:disabled)]:translate-y-0.5
+[&:hover:not(:disabled)]:drop-shadow-none
 
 `)
 
-const switchClasses = sanitize(`
+const switchClasses = tailwindSanitize(`
 w-[48px] h-[24px] p-px rounded-full relative
 transition-all duration-600 ease-in-out
 before:transition-all before:duration-600 before:ease-in-out
 cursor-pointer
-bg-base-200 before:bg-base-50 dark:bg-darkmode-900 dark:before:bg-darkmode-300
+bg-base-300 dark:bg-base-400 before:bg-base-50 dark:before:bg-base-800
 border-0 outline-none
+shadow-[inset_2px_2px_2px_rgba(0,0,0,0.1)]
+disabled:opacity-30 disabled:cursor-not-allowed
 
 focus:ring-4 focus:ring-accent focus:ring-opacity-20
 dark:focus:ring-opacity-50
@@ -320,25 +331,23 @@ dark:focus:ring-opacity-50
 [&[type='checkbox']]:checked:bg-accent [&[type='checkbox']]:checked:border-accent
 [&[type='checkbox']]:checked:border-opacity-10
 
-[&:disabled:not(:checked)]:bg-base-400 [&:disabled:not(:checked)]:cursor-not-allowed
-[&:disabled:not(:checked)]:dark:bg-darkmode-800/40 [&:disabled:checked]:opacity-40
-[&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/40
 
-
-before:w-[20px] before:h-[20px] before:shadow-[1px_1px_4px_rgba(0,0,0,0.4)] before:absolute before:inset-y-0
+before:w-[20px] before:h-[20px] before:shadow-[2px_2px_4px_rgba(0,0,0,0.3)] before:absolute before:inset-y-0
 before:ml-[2px] before:my-auto before:rounded-full
 
-dark:before:checked:bg-darkmode-200
 checked:bg-accent checked:bg-none
 before:checked:ml-[28px] before:checked:bg-base-50
   
 `)
 // border-2 border-solid before:dark:bg-darkmode-500  border-neutral-300 outline-none dark:border-transparent checked:border-accent 
 
-const checkBoxClasses = sanitize(`
+const checkBoxClasses = tailwindSanitize(`
 relative float-left mr-[6px] mt-[-0.5] h-[24px] w-[24px] appearance-none rounded${rounding} cursor-pointer
-bg-base-50 dark:bg-darkmode-900
+bg-base-50 dark:bg-base-400
 border-0 outline-none
+disabled:opacity-30 disabled:cursor-not-allowed
+shadow-[inset_2px_2px_2px_rgba(0,0,0,0.1)]
+
 before:pointer-events-none before:absolute before:h-[14px] before:w-[14px] before:scale-0 before:rounded-full
 before:bg-transparent before:opacity-0 before:shadow-[0px_0px_0px_13px_transparent] before:content-['']
 
@@ -348,23 +357,24 @@ checked:before:opacity-[0.16]
 
 checked:after:absolute checked:after:-mb-[2px] checked:after:ml-[6px] checked:after:block
 checked:after:h-[1.2rem] checked:after:w-[0.6rem] checked:after:rotate-45 checked:after:border-[0.25rem]
-checked:after:border-l-0 checked:after:border-t-0 checked:after:border-solid checked:after:border-white
+checked:after:border-l-0 checked:after:border-t-0 checked:after:border-solid checked:after:border-base-50 dark:checked:after:border-base-800
 checked:after:bg-transparent checked:after:content-['']
-checked:after:drop-shadow-[1px_1px_4px_rgba(0,0,0,0.4)]
+checked:after:drop-shadow-[2px_2px_2px_rgba(0,0,0,0.4)]
 dark:checked:bg-accent dark:checked:after:border-darkmode-200
 
 focus:ring-4 focus:ring-accent focus:ring-opacity-20
 dark:focus:ring-opacity-50
 
 `)
-// border-2 border-solid border-neutral-300 outline-none dark:border-darkmode-400
-// dark:checked:border-accent 
 
 
-const radioClasses = sanitize(`
+const radioClasses = tailwindSanitize(`
 relative float-left mr-1 mt-[-0.5] h-[24px] w-[24px] appearance-none rounded-full cursor-pointer
-bg-base-50 dark:bg-darkmode-900
+bg-base-50 dark:bg-base-400
 border-0 outline-none
+disabled:opacity-30 disabled:cursor-not-allowed
+shadow-[inset_2px_2px_2px_rgba(0,0,0,0.1)]
+
 before:pointer-events-none before:absolute before:h-4 before:w-4 before:scale-0 before:rounded-full
 before:bg-transparent before:opacity-0 before:shadow-[0px_0px_0px_13px_transparent] before:content-['']
 
@@ -372,34 +382,79 @@ after:absolute after:z-[1] after:block after:h-4 after:w-4 after:rounded-full af
 
 checked:border-8 checked:border-solid checked:border-accent checked:before:opacity-[0.16]
 
-checked:after:absolute checked:after:left-1/2 checked:after:top-1/2
+checked:after:absolute checked:after:left-[-2px] checked:after:top-[-2px]
 checked:after:h-[12px] checked:after:w-[12px] checked:after:rounded-full checked:after:border-accent
 checked:after:bg-base-50 checked:after:content-[''] checked:after:[transform:tranbase(-50%,-50%)]
 checked:after:shadow-[1px_1px_4px_rgba(0,0,0,0.4)]
 
-dark:checked:border-accent dark:checked:after:border-accent dark:checked:after:bg-darkmode-200
+dark:checked:border-accent dark:checked:after:border-accent dark:checked:after:bg-base-800
 focus:ring-4 focus:ring-accent focus:ring-opacity-20
 dark:focus:ring-opacity-50
 
 `)
-// border-2 border-solid border-neutral-300 outline-none dark:border-darkmode-400
 
 
 const errorMessageClasses = "text-sm pl-1 pt-1 font-bold text-error "
-const errorFieldClasses = "outline-1 outline-dashed outline-error "
-const labelClasses = " font-bold "
+const errorFieldClasses = "ring-4 ring-error ring-opacity-30 dark:ring-opacity-50"
+
 const labelSideClasses = computed(()=>`flex-col w-full ${ isSide.value } xl:text-right xl:pr-4 leading-none `)
 const labelFloatingClasses = "pointer-events-none inset-0 px-3 mt-2 absolute block mt-0 opacity-50 w-max"
+const labelClasses = computed(() => tailwindSanitize("font-bold ", schema.value['input-label-class']))
+
 const helperClasses = `text-sm pt-1 leading-none opacity-60 grow pr-1`
 const requiredClasses = "ml-2 px-2 py-0.5 leading-none bg-base-300 text-base-600 dark:bg-darkmode-600 dark:text-darkmode-300 text-xs rounded${rounding} "
 const requiredFloatingClasses = " "
 
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
+
 .text-shadow {
-  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.4);
+  text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.4);
 }
+
+.text-shadow-embossed {
+    text-shadow: 0px -1px 2px rgba(255, 255, 255, 0.8), 0px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+:root[class~="dark"], .dark {
+  .text-shadow-embossed {
+    text-shadow: 0px 2px 2px currentColor;
+  }
+}
+
+</style>
+
+<style lang="scss" scoped>
+
+:root[class~="dark"], .dark {
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover, 
+  input:-webkit-autofill:focus,
+  textarea:-webkit-autofill,
+  textarea:-webkit-autofill:hover,
+  textarea:-webkit-autofill:focus,
+  select:-webkit-autofill,
+  select:-webkit-autofill:hover,
+  select:-webkit-autofill:focus,
+  input:autofill,
+  input:autofill:hover, 
+  input:autofill:focus,
+  textarea:autofill,
+  textarea:autofill:hover,
+  textarea:autofill:focus,
+  select:autofill,
+  select:autofill:hover,
+  select:autofill:focus
+
+  {
+    -webkit-box-shadow: 0 0 0 30px #1b3d7a inset !important;
+    box-shadow: 0 0 0 30px #1b3d7a inset !important;
+    -webkit-text-fill-color: #fff !important;
+  }
+}
+
+
 
 [type=checkbox],
 [type=radio],
@@ -420,6 +475,7 @@ textarea {
 
 input[type=number] {
   position: relative;
+  -moz-appearance:textfield;
 }
 
 input[type=number]::-webkit-outer-spin-button,

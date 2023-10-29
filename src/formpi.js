@@ -7,20 +7,12 @@ import * as AllRules from "@vee-validate/rules"
 
 import { OhVueIcon } from "oh-vue-icons"
 
+import { throttle, tailwindSanitize } from "./utils"
+
 Object.keys(AllRules).forEach((rule) => {
   defineRule(rule, AllRules[rule])
 })
 
-const throttle = (func, delay) => {
-  let prev = 0
-  return (...args) => {
-    let now = new Date().getTime()
-    if (now - prev > delay) {
-      prev = now
-      return func(...args)
-    }
-  }
-}
 
 const clickOutside = {
   beforeMount: (el, binding) => {
@@ -56,6 +48,7 @@ const focusOutside = {
   },
 }
 
+
 export default {
   install: (app, options) => {
     app.component("formpi", FormPi)
@@ -65,5 +58,6 @@ export default {
     app.directive("focus-outside", focusOutside)
     app.component("v-icon", OhVueIcon)
     app.config.globalProperties.$throttle = throttle
+    app.config.globalProperties.$tailwindSanitize = tailwindSanitize
   },
 }

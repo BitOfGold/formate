@@ -1,7 +1,7 @@
 <template>
     <form @submit.prevent="onSubmit" :class="'select-none flex-col gap-2 text-base-700 ' + classes" :language="locale">
         <slot></slot>
-        <fieldset v-for="(g, n) in freshSchema.groups" :class="'flex flex-col gap-2 field-group ' + g.class">
+        <fieldset v-for="(g, n) in freshSchema.groups" :class="'flex flex-col gap-2 field-group ' + g.class + ' ' + groupClass">
             <legend v-if="g.label" :class="legendClasses + (g['label-class'] ? g['label-class'] : ' ')">{{ g.label }}</legend>
             <FormField v-for="(f, fn) in g.fields" :name="fn" :schema="f" :floating="floating" :side="side" :messages="messages"></FormField>
         </fieldset>
@@ -21,14 +21,18 @@ const props = defineProps({
     modelValue: Object,
     schema: Object,
     locale: { type: String, default: 'en' },
-    tabindex: { default: 1 },
+    tabindex: Boolean | String | Number,
     floating: Boolean | String,
     side: Boolean | String,
     class: String,
+    groupClass: String,
+    inputClass: String,
+    inputContainerClass: String,
+    inputLabelClass: String,
 })
 
-const { modelValue, schema, locale, floating, side, tabindex } = toRefs(props)
-const tabindex_v = computed(() => parseInt(tabindex.value))
+const { modelValue, schema, locale, floating, side, tabindex, groupClass, inputClass, inputContainerClass, inputLabelClass} = toRefs(props)
+const tabindex_v = computed(() => { tabindex.value ? parseInt(tabindex.value): 1 })
 const classes = ref(props.class)
 const emit = defineEmits(['update:modelValue', 'change', 'submit'])
 
@@ -93,6 +97,9 @@ const freshSchema = computed(() => {
     let fid = 1
 
     function addGroup(attr = {}) {
+        if (!attr) {
+            attr = {}
+        }
         let name = false;
         if (attr.name) {
             name = attr.name
@@ -105,7 +112,7 @@ const freshSchema = computed(() => {
         return name
     }
 
-    function addField(attr, group = false) {
+    function addField(attr, group = false, options = [], slots = []) {
         if (attr.type != 'html') {
             attr.tabindex = tindex++
         }
@@ -134,6 +141,15 @@ const freshSchema = computed(() => {
                 attr.type = 'text'
             }
         }
+
+        if (options.length > 0) {
+            attr.options = options
+        }
+
+        attr['input-class'] = inputClass.value
+        attr['input-container-class'] = inputContainerClass.value
+        attr['input-label-class'] = inputLabelClass.value
+        attr['slots'] = slots
         if (group) {
             if (!allSchema.groups[group].fields) {
                 allSchema.groups[group].fields = {}
@@ -145,21 +161,47 @@ const freshSchema = computed(() => {
         }
     }
 
-    if (slots.default) {
-        slots.default().forEach((vNode) => {
-            if (vNode.type && vNode.type.name === 'field') {
-                addField(vNode.props)
-            }
-            if (vNode.type && vNode.type.name === 'group') {
-                let groupName = addGroup(vNode.props);
-                if (vNode.children && vNode.children.default) {
-                    vNode.children.default().forEach((cNode) => {
-                        if (cNode.type && cNode.type.name === 'field') {
-                            addField(cNode.props, groupName);
+    function process_node(vNode, groupName = false) {
+        if (vNode.type && vNode.type.name === 'field') {
+            let options = []
+            let slots = []
+            if (vNode.children) {
+                for (let ckey in vNode.children) {
+                    if (ckey == 'default') {
+                        vNode.children.default().forEach((cNode) => {
+                            if (cNode.type && cNode.type === 'option') {
+                                let opt = {title: cNode.children}
+                                cNode.props = cNode.props || {}
+                                for (let k in cNode.props) {
+                                    opt[k] = cNode.props[k]
+                                }
+                                options.push(opt)
+                            }
+                        })
+                    } else {
+                        let slot = vNode.children[ckey]
+                        if (typeof slot === 'function') {
+                            console.log('slot', ckey, slot)
+                            slots.push({name: ckey, slot: slot})
                         }
-                    })
+                    }
                 }
             }
+            addField(vNode.props, groupName, options, slots)
+        }
+        if (vNode.type && vNode.type.name === 'group') {
+            let groupName = addGroup(vNode.props);
+            if (vNode.children && vNode.children.default) {
+                vNode.children.default().forEach((cNode) => {
+                    process_node(cNode, groupName)
+                })
+            }
+        }
+    }
+
+    if (slots.default) {
+        slots.default().forEach((vNode) => {
+            process_node(vNode)
         })
     }
 
