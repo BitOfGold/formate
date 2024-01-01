@@ -1,0 +1,155 @@
+$levels:
+'50' 1 2 '950',
+'100' 1 1.9 '900',
+'200' 1 1.8 '800',
+'300' 1 1.6 '700',
+'400' 1 1.4 '600',
+'500' 1 1 '500',
+'600' 0.98 0.8 '400',
+'700' 0.96 0.72 '300',
+'800' 0.94 0.6 '200',
+'900' 0.92 0.57 '100',
+'950' 0.9 0.45 '50'
+;
+
+$colors: 'base','accent','extra','success','info','warning','error';
+
+* {
+    @each $color in $colors {
+        @each $level, $sratio, $lratio, $darklevel in $levels {
+            @if ($color == 'base') {
+                --light-#{$color}-#{$level}: hsl(var(--hue-#{$color}), calc(var(--saturation-#{$color}) * #{$sratio}), calc(var(--lightness-#{$color}) * #{$lratio}));
+                --dark-#{$color}-#{$darklevel}: hsl(var(--hue-#{$color}), calc(var(--saturation-#{$color}) * #{$sratio}), calc(var(--lightness-#{$color}) * #{$lratio}));
+            } @else {
+                --#{$color}-#{$level}: hsl(var(--hue-#{$color}), calc(var(--saturation-#{$color}) * #{$sratio}), calc(var(--lightness-#{$color}) * #{$lratio}));
+                @if ($level == '500') {
+                    --#{$color}: hsl(var(--hue-#{$color}), calc(var(--saturation-#{$color}) * #{$sratio}), calc(var(--lightness-#{$color}) * #{$lratio}));
+                }
+            }
+        }
+    }
+}
+
+
+:root[class~="light"], .light {
+    --tw-ring-opacity: 0.2;
+}
+
+:root[class~="dark"], .dark {
+    --tw-ring-opacity: 0.5;
+}
+
+*[class~="light"], .light {
+    --base-50:  var(--light-base-50);
+    --base-100: var(--light-base-100);
+    --base-200: var(--light-base-200);
+    --base-300: var(--light-base-300);
+    --base-400: var(--light-base-400);
+    --base-500: var(--light-base-500);
+    --base:     var(--light-base-500);
+    --base-600: var(--light-base-600);
+    --base-700: var(--light-base-700);
+    --base-800: var(--light-base-800);
+    --base-900: var(--light-base-900);
+    --base-950: var(--light-base-950);
+}
+
+*[class~="dark"], .dark {
+    --base-50:  var(--dark-base-50);
+    --base-100: var(--dark-base-100);
+    --base-200: var(--dark-base-200);
+    --base-300: var(--dark-base-300);
+    --base-400: var(--dark-base-400);
+    --base-500: var(--dark-base-500);
+    --base:     var(--dark-base-500);
+    --base-600: var(--dark-base-600);
+    --base-700: var(--dark-base-700);
+    --base-800: var(--dark-base-800);
+    --base-900: var(--dark-base-900);
+    --base-950: var(--dark-base-950);
+}
+
+@each $color in $colors {
+    @each $level, $sratio, $lratio in $levels {
+
+        .bg-#{$color}-#{$level} {
+            background-color: var(--#{$color}-#{$level});
+        }
+
+        .text-#{$color}-#{$level} {
+            color: var(--#{$color}-#{$level});
+        }
+
+        .border-#{$color}-#{$level} {
+            border-color: var(--#{$color}-#{$level});
+        }
+
+        .border-b-#{$color}-#{$level} {
+            border-bottom-color: var(--#{$color}-#{$level});
+        }
+
+        .border-r-#{$color}-#{$level} {
+            border-right-color: var(--#{$color}-#{$level});
+        }
+
+        .outline-#{$color}-#{$level} {
+            outline-color: var(--#{$color}-#{$level});
+        }
+
+        .from-#{$color}-#{$level} {
+            --tw-gradient-from: var(--#{$color}-#{$level}) var(--tw-gradient-from-position);
+        }
+
+        .to-#{$color}-#{$level} {
+            --tw-gradient-to: var(--#{$color}-#{$level}) var(--tw-gradient-to-position);
+            --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+        }
+
+    }
+
+    .bg-#{$color} {
+        background-color: var(--#{$color});
+    }
+
+    .text-#{$color} {
+        color: var(--#{$color});
+    }
+
+    .border-#{$color} {
+        border-color: var(--#{$color});
+    }
+
+    .border-b-#{$color} {
+        border-bottom-color: var(--#{$color});
+    }
+
+    .border-r-#{$color} {
+        border-right-color: var(--#{$color});
+    }
+
+    .outline-#{$color} {
+        outline-color: var(--#{$color});
+    }
+
+    .ring-#{$color} {
+        --tw-ring-color: hsla(var(--hue-#{$color}), var(--saturation-#{$color}), var(--lightness-#{$color}), var(--tw-ring-opacity));
+    }
+}
+
+.textshadow {
+    text-shadow: 1px 1px 2px rgba(0 0 0 / 0.3), 2px 2px 3px rgba(0 0 0 / 0.2), 3px 3px 4px rgba(0 0 0 / 0.1);
+}
+
+.textshadow svg {
+    filter: drop-shadow(1px 1px 2px rgba(0 0 0 / 0.3)) drop-shadow(2px 2px 3px rgba(0 0 0 / 0.2)) drop-shadow(3px 3px 4px rgba(0 0 0 / 0.1)); 
+}
+
+.textshadow-embossed {
+    text-shadow: 0px -1px 3px rgba(255 255 255 / 0.6), 0px 1px 3px rgba(0 0 0 / 0.37);
+}
+
+:root[class~="dark"], .dark {
+    .textshadow-embossed {
+        text-shadow: 0px -1px 2px rgba(0 0 0 / 0.37), 0px 1px 2px rgba(255 255 255 / 0.6);
+    }
+}

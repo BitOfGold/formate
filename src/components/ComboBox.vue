@@ -1,72 +1,75 @@
 <template>
-    <div ref="trigger" v-click-outside="leave" v-focus-outside="leave" @wheel="onWheel($event)" @keydown="onKey($event)">
-      <div :class="classes">
-        <input :id="id" ref="input" :tabindex="tabindex" type="text" role="presentation" autocomplete="off" :class="'w-full h-full '+ (!search || !opened ? ' opacity-0 ': '') +(search?' pl-10 ':' pl-3 cursor-pointer ')+' pr-8 bg-transparent outline-0'" @click="open" />
-        <div v-if="selected && !opened" 
-          :class="'absolute w-full h-full pointer-events-none px-' + (search?'10':'3')
-          + ' pr-8 py-2 flex items-center '
-          + (optionClass ? optionClass : '')
-        ">
-          <slot name="selected" :option="selected">
-            <a><b class="pr-4">{{ selected.title }}</b>
-            <small class="opacity-70">{{ selected.description }}</small></a>
-          </slot>
-        </div>
-        <div v-if="!selected && !opened" 
-          :class="'absolute w-full h-full pointer-events-none px-'
-          +(search?'10':'3')
-          +' pr-8 py-2 flex items-center '
-          + (optionClass ? optionClass : '')
-          "
-        >
-          <slot name="notselected">
-          -- Nincs kiválasztva --
-          </slot>
-        </div>
-        <div v-if="search" class="absolute w-6 h-6 pointer-events-none left-3">
-          <v-icon name="la-search-solid" flip="horizontal" />
-        </div>
-        <div class="absolute w-6 h-6 pointer-events-none right-1">
-          <v-icon name="hi-selector"/>
+    <Dropdown v-model="opened">
+      <template #target="{ toggleDropdown }">
+        <div ref="trigger" v-click-outside="leave" v-focus-outside="leave" @wheel="onWheel($event)" @keydown="onKey($event)">
+        <div :class="classes">
+          <input :id="id" ref="input" :tabindex="tabindex" type="text" role="presentation" autocomplete="off" :class="'w-full h-full '+ (!search || !opened ? ' opacity-0 ': '') +(search?' pl-10 ':' pl-3 cursor-pointer ')+' bg-transparent outline-0'" @click="open" />
+          <div v-if="selected && !opened" 
+            :class="'absolute w-full h-full pointer-events-none pl-' + (search?'10':'4')
+            + ' py-2 flex items-center '
+            + (optionClass ? optionClass : '')
+          ">
+            <slot name="selected" :option="selected">
+              <a>
+                <b class="pr-2">{{ selected.title }}</b>
+              </a>
+            </slot>
+          </div>
+          <div v-if="!selected && !opened" 
+            :class="'absolute w-full h-full pointer-events-none pl-'
+            +(search?'10':'4')
+            +' py-2 flex items-center '
+            + (optionClass ? optionClass : '')
+            "
+          >
+            <slot name="notselected">
+            -- Nincs kiválasztva --
+            </slot>
+          </div>
+          <div v-if="search" class="absolute w-6 h-6 pointer-events-none left-3">
+            <Icon name="la-search-solid" flip="horizontal" />
+          </div>
+          <div class="absolute w-6 h-6 pointer-events-none right-1">
+            <Icon name="hi-selector"/>
+          </div>
         </div>
       </div>
-    </div>
-    <div ref="floating" :style="styles"
-      :class="'absolute z-[1000] top-0 left-0 bg-base-100 p-1 rounded-md shadow-lg overflow-y-scroll scrollstyle '
-        + (opened ? ' block ' : ' hidden ')
-      "
-      @wheel="onWheel($event)"
-    >
-      <ul class="w-full leading-none">
+      </template>
+      <div ref="floating" :class="'py-1 overflow-y-auto scrollstyle '" @wheel="onWheel($event)">
+      <ul class="w-full py-1 leading-none">
         <li v-for="(o, n) in opt"
             @click="select(o.value);leave()"
             @mouseover="focus(o.value)"
             :class="'px-4 py-2 flex items-center cursor-pointer outline-0 border-0 '
-            + (isSelected(o.value) ? 'bg-accent text-base-200 ': ' ')
-            + (focused == o.value ? ' ring-4 ring-accent ring-opacity-50 ': ' ')
+            + (focused == o.value ? 'bg-accent text-white textshadow ': ' ')
             + (optionClass ? optionClass : '')
             "
         >
           <slot name="option" :option="o">
-            <a><b class="pr-4">{{ o.title }}</b>
-            <small class="opacity-70">{{ o.description }}</small></a>
+            <div v-if="isSelected(o.value)" class="w-6 h-6 mr-4">
+              <Icon name="md-checkbox" />
+            </div>
+            <div v-else class="w-6 h-6 mr-4">
+              <Icon name="md-checkboxoutlineblank" />
+            </div>
+            <a>
+              <b class="pr-2">{{ o.title }}</b>
+              <small class="opacity-70">{{ o.description }}</small>
+            </a>
           </slot>
         </li>
         </ul>
     </div>
+    </Dropdown>
 </template>
 
 <script setup>
-import { computed, defineProps, defineEmits, ref, toRefs, onMounted } from "vue"
-import { addIcons } from "oh-vue-icons"
-import { LaSearchSolid, HiSelector } from "oh-vue-icons/icons"
-addIcons(LaSearchSolid)
-addIcons(HiSelector)
+import { computed, ref, toRefs, onMounted } from "vue"
+import { LaSearchSolid, HiSelector, MdCheckbox, MdCheckboxoutlineblank } from "oh-vue-icons/icons"
+window.addIcons(LaSearchSolid, HiSelector, MdCheckbox, MdCheckboxoutlineblank)
 
 let styles = ref('')
 const input = ref(null)
-const floating = ref(null)
-const trigger = ref('')
 const focused = ref(false)
 
 const props = defineProps({
@@ -150,7 +153,6 @@ const select = (value) => {
 
 const open = () => {
   opened.value = true
-  correct()
 }
 
 const leave = () => {
@@ -212,52 +214,6 @@ const onWheel = (e) => {
     return false
   }
 }
-
-function correct() {
-  if (opened.value) {
-    const border = 16
-    const minh = 210
-    const maxh = 420
-    const minw = 420
-    var rect = trigger.value.getBoundingClientRect()
-    let vw = window.innerWidth
-    let vh = window.innerHeight
-    let placeUp = rect.top - border
-    let placeDown = vh - rect.top - rect.height - border
-    let placeRight = vw - rect.left - border
-    let x = 0
-    let y = rect.height + 4
-    let w
-    if ((placeRight > rect.width) && (placeRight > minw)) {
-      w = rect.width
-    } else if (placeRight > minw) {
-      w = Math.max(placeRight, minw)
-    } else {
-      w = vw - (border * 2)
-      x = -rect.left + (vw - w) / 2
-    }
-    let h
-    if (placeDown > minh) {
-      h = Math.min(maxh, placeDown)
-    } else if (placeUp > minh) {
-      h = Math.min(maxh, placeUp)
-      y = - h - 4
-    } else {
-      h = Math.min(maxh, vh - (border * 2))
-      y = -rect.height + (vh - h) / 2
-    }
-    styles.value = `left: ${x}px; top: ${y}px; width: ${w}px; height: ${h}px`
-    //console.log(`placeLeft: ${placeLeft}, placeRight: ${placeRight}, placeUp: ${placeUp}, placeDown: ${placeDown}`, styles.value)
-  }
-}
-
-onMounted(() => {
-  console.log('onMounted')
-  window.setInterval(() => {
-    correct()
-  }, 120)
-})
-
 
 </script>
 

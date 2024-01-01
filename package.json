@@ -1,6 +1,6 @@
 {
   "name": "formpi",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "FormPI: A Vue Form component library/form builder. Using Tailwind CSS and Headless UI.",
   "exports": {
     "import": "./dist/formpi.mjs",
@@ -11,8 +11,8 @@
     "locale"
   ],
   "scripts": {
-    "dev": "vite build --watch",
-    "build": "vite build",
+    "dev": "bunx --bun vite build --watch",
+    "build": "bunx --bun vite build",
     "locales": "node ./scripts/locales.js"
   },
   "repository": {
@@ -34,18 +34,19 @@
     "url": "https://github.com/BitOfGold/formpi/issues"
   },
   "homepage": "https://github.com/BitOfGold/formpi#readme",
-  "devDependencies": {
-    "@vitejs/plugin-vue": "^4.4.0",
-    "sass": "^1.68.0",
-    "vite": "^4.4.10",
-    "vite-plugin-css-injected-by-js": "^3.3.0"
-  },
   "dependencies": {
-    "@vee-validate/i18n": "^4.11.7",
-    "@vee-validate/rules": "^4.11.7",
+    "@vee-validate/i18n": "^4.12.2",
+    "@vee-validate/rules": "^4.12.2",
     "@vueup/vue-quill": "^1.2.0",
     "oh-vue-icons": "^1.0.0-rc3",
-    "vee-validate": "^4.11.7",
-    "vue": "^3.3.4"
+    "tailwind-merge": "^2.1.0",
+    "vee-validate": "^4.12.2",
+    "vue": "^3.3.9"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.5.1",
+    "sass": "^1.69.5",
+    "vite": "^5.0.4",
+    "vite-plugin-css-injected-by-js": "^3.3.0"
   }
 }

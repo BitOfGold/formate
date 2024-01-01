@@ -1,3 +1,10 @@
+import "./formpi.scss"
+
+import Modal from "./components/Modal.vue"
+import Dropdown from "./components/Dropdown.vue"
+import Card from "./components/Card.vue"
+import Button from "./components/Button.vue"
+
 import FormPi from "./components/FormPi.vue"
 import Group from "./components/group.vue"
 import Field from "./components/field.vue"
@@ -5,14 +12,13 @@ import Field from "./components/field.vue"
 import { defineRule } from "vee-validate"
 import * as AllRules from "@vee-validate/rules"
 
-import { OhVueIcon } from "oh-vue-icons"
+import { OhVueIcon, addIcons } from "oh-vue-icons"
 
 import { throttle, tailwindSanitize } from "./utils"
 
 Object.keys(AllRules).forEach((rule) => {
   defineRule(rule, AllRules[rule])
 })
-
 
 const clickOutside = {
   beforeMount: (el, binding) => {
@@ -51,12 +57,19 @@ const focusOutside = {
 
 export default {
   install: (app, options) => {
-    app.component("formpi", FormPi)
+    app.component("Modal", Modal)
+    app.component("Dropdown", Dropdown)
+    app.component("Card", Card)
+    app.component("Button", Button)
+
+    app.component("Form", FormPi)
     app.component("group", Group)
     app.component("field", Field)
+
     app.directive("click-outside", clickOutside)
     app.directive("focus-outside", focusOutside)
-    app.component("v-icon", OhVueIcon)
+    app.component("Icon", OhVueIcon)
+    window.addIcons = addIcons
     app.config.globalProperties.$throttle = throttle
     app.config.globalProperties.$tailwindSanitize = tailwindSanitize
   },

@@ -11,7 +11,7 @@
 
 <script setup>
 const legendClasses = "w-full text-lg font-bold pb-1 mb-4 "
-import { useSlots, defineProps, defineEmits, computed, ref, toRefs, watch, onMounted } from 'vue'
+import { useSlots, computed, ref, toRefs, watch, onMounted } from 'vue'
 import FormField from './FormField.vue'
 import { useForm, configure } from 'vee-validate'
 import { localize } from '@vee-validate/i18n';
