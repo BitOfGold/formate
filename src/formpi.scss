@@ -1,29 +1,40 @@
+/*
+https://uicolors.app/create
+colors around 50% L, locked to level 600
+*/
 $levels:
-'50' 1 2 '950',
-'100' 1 1.9 '900',
-'200' 1 1.8 '800',
-'300' 1 1.6 '700',
-'400' 1 1.4 '600',
-'500' 1 1 '500',
-'600' 0.98 0.8 '400',
-'700' 0.96 0.72 '300',
-'800' 0.94 0.6 '200',
-'900' 0.92 0.57 '100',
-'950' 0.9 0.45 '50'
+'50'  '97%' '950',
+'100' '93%' '900',
+'200' '87%' '800',
+'300' '78%' '700',
+'400' '68%' '600',
+'500' '60%' '500',
+'600' '50%' '400',
+'700' '48%' '300',
+'800' '40%' '200',
+'900' '33%' '100',
+'950' '21%' '50'
 ;
 
 $colors: 'base','accent','extra','success','info','warning','error';
 
 * {
     @each $color in $colors {
-        @each $level, $sratio, $lratio, $darklevel in $levels {
+        @each $level, $l, $darklevel in $levels {
             @if ($color == 'base') {
-                --light-#{$color}-#{$level}: hsl(var(--hue-#{$color}), calc(var(--saturation-#{$color}) * #{$sratio}), calc(var(--lightness-#{$color}) * #{$lratio}));
-                --dark-#{$color}-#{$darklevel}: hsl(var(--hue-#{$color}), calc(var(--saturation-#{$color}) * #{$sratio}), calc(var(--lightness-#{$color}) * #{$lratio}));
+                @if ($level == '600') {
+                    --light-#{$color}-#{$level}: hsl(var(--hue-#{$color}), var(--saturation-#{$color}), var(--lightness-#{$color}));
+                    --dark-#{$color}-#{$darklevel}: hsl(var(--hue-#{$color}), var(--saturation-#{$color}), var(--lightness-#{$color}));
+                } @else {
+                    --light-#{$color}-#{$level}: hsl(var(--hue-#{$color}), var(--saturation-#{$color}), #{$l});
+                    --dark-#{$color}-#{$darklevel}: hsl(var(--hue-#{$color}), var(--saturation-#{$color}), #{$l});
+                }
             } @else {
-                --#{$color}-#{$level}: hsl(var(--hue-#{$color}), calc(var(--saturation-#{$color}) * #{$sratio}), calc(var(--lightness-#{$color}) * #{$lratio}));
-                @if ($level == '500') {
-                    --#{$color}: hsl(var(--hue-#{$color}), calc(var(--saturation-#{$color}) * #{$sratio}), calc(var(--lightness-#{$color}) * #{$lratio}));
+                @if ($level == '600') {
+                    --#{$color}-#{$level}: hsl(var(--hue-#{$color}), var(--saturation-#{$color}), var(--lightness-#{$color}));
+                    --#{$color}: hsl(var(--hue-#{$color}), var(--saturation-#{$color}), var(--lightness-#{$color}));
+                } @else {
+                    --#{$color}-#{$level}: hsl(var(--hue-#{$color}), var(--saturation-#{$color}), #{$l});
                 }
             }
         }
@@ -46,8 +57,8 @@ $colors: 'base','accent','extra','success','info','warning','error';
     --base-300: var(--light-base-300);
     --base-400: var(--light-base-400);
     --base-500: var(--light-base-500);
-    --base:     var(--light-base-500);
     --base-600: var(--light-base-600);
+    --base:     var(--light-base-600);
     --base-700: var(--light-base-700);
     --base-800: var(--light-base-800);
     --base-900: var(--light-base-900);
@@ -61,8 +72,8 @@ $colors: 'base','accent','extra','success','info','warning','error';
     --base-300: var(--dark-base-300);
     --base-400: var(--dark-base-400);
     --base-500: var(--dark-base-500);
-    --base:     var(--dark-base-500);
     --base-600: var(--dark-base-600);
+    --base:     var(--dark-base-600);
     --base-700: var(--dark-base-700);
     --base-800: var(--dark-base-800);
     --base-900: var(--dark-base-900);
