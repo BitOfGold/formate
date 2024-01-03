@@ -86,7 +86,7 @@ const { modelValue, id, name, options, search, tabindex, optionClass } = toRefs(
 const classes = ref(props.class)
 
 const opt = computed(() => {
-  console.log('combobox opt', options.value)
+  //console.log('combobox opt', options.value)
   return options.value
 })
 

@@ -72,5 +72,6 @@ export default {
     window.addIcons = addIcons
     app.config.globalProperties.$throttle = throttle
     app.config.globalProperties.$tailwindSanitize = tailwindSanitize
+    
   },
 }

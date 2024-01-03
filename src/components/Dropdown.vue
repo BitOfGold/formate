@@ -96,7 +96,7 @@ function updatePosition() {
             y = -rect.height + (vh - h) / 2
         }
         styles.value = `left: ${x}px; top: ${y}px; min-width: ${w}px; width: ${w}px; height: ${h}px; transform-origin: ${tori};`
-        console.log(rect, styles.value)
+        //console.log(rect, styles.value)
         animationFrameId = requestAnimationFrame(updatePosition);
     }
 }
